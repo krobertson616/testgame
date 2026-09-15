@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Star Sprint</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: radial-gradient(circle at top, #18233a 0, #080b12 55%, #030407 100%); color: #f7fbff; }
+    .wrap { width: min(920px, 100%); padding: 18px; }
+    .top { display:flex; align-items:end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:12px; }
+    h1 { margin:0; font-size:clamp(28px,5vw,46px); letter-spacing:-0.04em; }
+    .sub { margin:4px 0 0; color:#aeb8ca; }
+    .stats { display:flex; gap:10px; flex-wrap:wrap; }
+    .pill { padding:8px 12px; border:1px solid #32405a; border-radius:999px; background:#101726cc; font-weight:700; }
+    .game-shell { position:relative; border:1px solid #2d3950; border-radius:18px; overflow:hidden; background:#080d16; box-shadow:0 24px 80px #0008; }
+    canvas { display:block; width:100%; aspect-ratio:16/9; touch-action:none; }
+    .overlay { position:absolute; inset:0; display:grid; place-items:center; padding:24px; background:#05080ec9; text-align:center; }
+    .card { max-width:520px; padding:24px; border:1px solid #34425c; border-radius:18px; background:#0d1422f2; }
+    .card h2 { margin:0 0 8px; font-size:32px; }
+    .card p { margin:8px 0 18px; color:#b7c0d2; line-height:1.5; }
+    button { border:0; border-radius:12px; padding:12px 18px; font:inherit; font-weight:800; cursor:pointer; color:#07111f; background:#7dd3fc; }
+    button:hover { filter:brightness(1.08); }
+    .help { margin:12px 2px 0; color:#94a3b8; font-size:14px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .touch { display:none; margin-top:12px; grid-template-columns:repeat(3,64px); grid-template-rows:repeat(2,54px); justify-content:center; gap:8px; }
+    .touch button { padding:0; color:#eaf6ff; background:#152033; border:1px solid #34425c; }
+    .touch .up { grid-column:2; }
+    .touch .left { grid-column:1; grid-row:2; }
+    .touch .down { grid-column:2; grid-row:2; }
+    .touch .right { grid-column:3; grid-row:2; }
+    @media (max-width: 700px), (pointer:coarse) { .touch { display:grid; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top">
+      <div>
+        <h1>Star Sprint</h1>
+        <p class="sub">Collect stars. Dodge the hunters. Survive as long as you can.</p>
+      </div>
+      <div class="stats" aria-live="polite">
+        <div class="pill">Score: <span id="score">0</span></div>
+        <div class="pill">Best: <span id="best">0</span></div>
+        <div class="pill">Lives: <span id="lives">3</span></div>
+      </div>
+    </div>
+
+    <section class="game-shell">
+      <canvas id="game" width="960" height="540" aria-label="Star Sprint game area"></canvas>
+      <div class="overlay" id="overlay">
+        <div class="card">
+          <h2 id="overlayTitle">Ready?</h2>
+          <p id="overlayText">Use WASD or the arrow keys to move. Grab the glowing stars and avoid the red hunters. Every five stars makes the game a little faster.</p>
+          <button id="start">Start Game</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="touch" aria-label="Touch controls">
+      <button class="up" data-key="ArrowUp" type="button">▲</button>
+      <button class="left" data-key="ArrowLeft" type="button">◀</button>
+      <button class="down" data-key="ArrowDown" type="button">▼</button>
+      <button class="right" data-key="ArrowRight" type="button">▶</button>
+    </div>
+
+    <div class="help">
+      <span>Move: WASD / Arrow keys</span>
+      <span>Goal: collect stars without getting hit</span>
+    </div>
+  </main>
+
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const bestEl = document.getElementById('best');
+  const livesEl = document.getElementById('lives');
+  const overlay = document.getElementById('overlay');
+  const overlayTitle = document.getElementById('overlayTitle');
+  const overlayText = document.getElementById('overlayText');
+  const startBtn = document.getElementById('start');
+
+  const keys = new Set();
+  let running = false;
+  let last = 0;
+  let score = 0;
+  let lives = 3;
+  let invuln = 0;
+  let best = Number(localStorage.getItem('starSprintBest') || 0);
+  bestEl.textContent = best;
+
+  const player = { x: 120, y: 270, r: 16, speed: 290 };
+  const star = { x: 700, y: 270, r: 12 };
+  let enemies = [];
+  let particles = [];
+
+  function rand(min, max) { return Math.random() * (max - min) + min; }
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+
+  function spawnStar() {
+    let tries = 0;
+    do {
+      star.x = rand(45, canvas.width - 45);
+      star.y = rand(45, canvas.height - 45);
+      tries++;
+    } while (dist(player, star) < 150 && tries < 20);
+  }
+
+  function spawnEnemy() {
+    const side = Math.floor(Math.random() * 4);
+    let x, y;
+    if (side === 0) { x = -30; y = rand(30, canvas.height - 30); }
+    if (side === 1) { x = canvas.width + 30; y = rand(30, canvas.height - 30); }
+    if (side === 2) { x = rand(30, canvas.width - 30); y = -30; }
+    if (side === 3) { x = rand(30, canvas.width - 30); y = canvas.height + 30; }
+    const speed = 92 + Math.min(score * 4, 150) + rand(-10, 18);
+    enemies.push({ x, y, r: 17, speed, wobble: rand(0, Math.PI * 2) });
+  }
+
+  function burst(x, y, count, kind) {
+    for (let i = 0; i < count; i++) {
+      const a = rand(0, Math.PI * 2);
+      const s = rand(45, 170);
+      particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: rand(.35, .8), kind });
+    }
+  }
+
+  function reset() {
+    score = 0;
+    lives = 3;
+    invuln = 0;
+    player.x = 120;
+    player.y = canvas.height / 2;
+    enemies = [];
+    particles = [];
+    spawnStar();
+    spawnEnemy();
+    spawnEnemy();
+    scoreEl.textContent = score;
+    livesEl.textContent = lives;
+  }
+
+  function startGame() {
+    reset();
+    running = true;
+    overlay.style.display = 'none';
+    last = performance.now();
+    requestAnimationFrame(loop);
+  }
+
+  function endGame() {
+    running = false;
+    if (score > best) {
+      best = score;
+      localStorage.setItem('starSprintBest', best);
+      bestEl.textContent = best;
+    }
+    overlayTitle.textContent = 'Game Over';
+    overlayText.textContent = `You collected ${score} star${score === 1 ? '' : 's'}. Your best score is ${best}.`;
+    startBtn.textContent = 'Play Again';
+    overlay.style.display = 'grid';
+  }
+
+  function update(dt) {
+    const up = keys.has('ArrowUp') || keys.has('w');
+    const down = keys.has('ArrowDown') || keys.has('s');
+    const left = keys.has('ArrowLeft') || keys.has('a');
+    const right = keys.has('ArrowRight') || keys.has('d');
+    let dx = (right ? 1 : 0) - (left ? 1 : 0);
+    let dy = (down ? 1 : 0) - (up ? 1 : 0);
+    if (dx || dy) {
+      const m = Math.hypot(dx, dy);
+      dx /= m; dy /= m;
+      player.x += dx * player.speed * dt;
+      player.y += dy * player.speed * dt;
+    }
+    player.x = clamp(player.x, player.r, canvas.width - player.r);
+    player.y = clamp(player.y, player.r, canvas.height - player.r);
+
+    if (dist(player, star) < player.r + star.r + 4) {
+      score++;
+      scoreEl.textContent = score;
+      burst(star.x, star.y, 16, 'star');
+      spawnStar();
+      if (score % 5 === 0) spawnEnemy();
+    }
+
+    for (const e of enemies) {
+      const angle = Math.atan2(player.y - e.y, player.x - e.x);
+      e.wobble += dt * 4;
+      e.x += Math.cos(angle + Math.sin(e.wobble) * .10) * e.speed * dt;
+      e.y += Math.sin(angle + Math.sin(e.wobble) * .10) * e.speed * dt;
+      if (invuln <= 0 && dist(player, e) < player.r + e.r) {
+        lives--;
+        livesEl.textContent = lives;
+        invuln = 1.35;
+        burst(player.x, player.y, 24, 'hit');
+        player.x = 120;
+        player.y = canvas.height / 2;
+        if (lives <= 0) { endGame(); return; }
+      }
+    }
+
+    invuln = Math.max(0, invuln - dt);
+    for (const p of particles) {
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vx *= .985;
+      p.vy *= .985;
+      p.life -= dt;
+    }
+    particles = particles.filter(p => p.life > 0);
+  }
+
+  function drawGrid() {
+    ctx.strokeStyle = '#172033';
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= canvas.width; x += 48) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y <= canvas.height; y += 48) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#070c15';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawGrid();
+
+    const pulse = 1 + Math.sin(performance.now() / 150) * .12;
+    ctx.save();
+    ctx.translate(star.x, star.y);
+    ctx.scale(pulse, pulse);
+    ctx.shadowBlur = 24;
+    ctx.shadowColor = '#fde68a';
+    ctx.fillStyle = '#fde68a';
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + i * Math.PI / 5;
+      const r = i % 2 === 0 ? 14 : 6;
+      const x = Math.cos(a) * r, y = Math.sin(a) * r;
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.closePath(); ctx.fill(); ctx.restore();
+
+    for (const e of enemies) {
+      ctx.save();
+      ctx.translate(e.x, e.y);
+      ctx.rotate(performance.now() / 700 + e.wobble * .15);
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = '#fb7185';
+      ctx.fillStyle = '#ef476f';
+      ctx.fillRect(-14, -14, 28, 28);
+      ctx.restore();
+    }
+
+    ctx.save();
+    ctx.globalAlpha = invuln > 0 && Math.floor(invuln * 10) % 2 === 0 ? .28 : 1;
+    ctx.shadowBlur = 22;
+    ctx.shadowColor = '#7dd3fc';
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#e0f2fe';
+    ctx.beginPath(); ctx.arc(player.x - 5, player.y - 5, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    for (const p of particles) {
+      ctx.globalAlpha = Math.max(0, p.life * 1.6);
+      ctx.fillStyle = p.kind === 'star' ? '#fde68a' : '#fb7185';
+      ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function loop(now) {
+    if (!running) return;
+    const dt = Math.min((now - last) / 1000, .033);
+    last = now;
+    update(dt);
+    draw();
+    if (running) requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('keydown', e => {
+    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","w","a","s","d"].includes(k)) e.preventDefault();
+    keys.add(k);
+  }, { passive:false });
+  window.addEventListener('keyup', e => keys.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key));
+
+  document.querySelectorAll('[data-key]').forEach(btn => {
+    const key = btn.dataset.key;
+    const press = e => { e.preventDefault(); keys.add(key); };
+    const release = e => { e.preventDefault(); keys.delete(key); };
+    btn.addEventListener('pointerdown', press);
+    btn.addEventListener('pointerup', release);
+    btn.addEventListener('pointercancel', release);
+    btn.addEventListener('pointerleave', release);
+  });
+
+  startBtn.addEventListener('click', startGame);
+  draw();
+})();
+</script>
+</body>
+</html>
