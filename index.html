@@ -3,308 +3,212 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Star Sprint</title>
+  <title>Aetherwild: First Steps</title>
   <style>
-    :root { color-scheme: dark; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: radial-gradient(circle at top, #18233a 0, #080b12 55%, #030407 100%); color: #f7fbff; }
-    .wrap { width: min(920px, 100%); padding: 18px; }
-    .top { display:flex; align-items:end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:12px; }
-    h1 { margin:0; font-size:clamp(28px,5vw,46px); letter-spacing:-0.04em; }
-    .sub { margin:4px 0 0; color:#aeb8ca; }
-    .stats { display:flex; gap:10px; flex-wrap:wrap; }
-    .pill { padding:8px 12px; border:1px solid #32405a; border-radius:999px; background:#101726cc; font-weight:700; }
-    .game-shell { position:relative; border:1px solid #2d3950; border-radius:18px; overflow:hidden; background:#080d16; box-shadow:0 24px 80px #0008; }
-    canvas { display:block; width:100%; aspect-ratio:16/9; touch-action:none; }
-    .overlay { position:absolute; inset:0; display:grid; place-items:center; padding:24px; background:#05080ec9; text-align:center; }
-    .card { max-width:520px; padding:24px; border:1px solid #34425c; border-radius:18px; background:#0d1422f2; }
-    .card h2 { margin:0 0 8px; font-size:32px; }
-    .card p { margin:8px 0 18px; color:#b7c0d2; line-height:1.5; }
-    button { border:0; border-radius:12px; padding:12px 18px; font:inherit; font-weight:800; cursor:pointer; color:#07111f; background:#7dd3fc; }
-    button:hover { filter:brightness(1.08); }
-    .help { margin:12px 2px 0; color:#94a3b8; font-size:14px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-    .touch { display:none; margin-top:12px; grid-template-columns:repeat(3,64px); grid-template-rows:repeat(2,54px); justify-content:center; gap:8px; }
-    .touch button { padding:0; color:#eaf6ff; background:#152033; border:1px solid #34425c; }
-    .touch .up { grid-column:2; }
-    .touch .left { grid-column:1; grid-row:2; }
-    .touch .down { grid-column:2; grid-row:2; }
-    .touch .right { grid-column:3; grid-row:2; }
-    @media (max-width: 700px), (pointer:coarse) { .touch { display:grid; } }
+    :root{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color-scheme:dark}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:#111827;color:#f8fafc;display:grid;place-items:center;padding:12px}
+    .app{width:min(940px,100%)}
+    .titlebar{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+    h1{font-size:clamp(24px,4vw,38px);margin:0;letter-spacing:-1px}.subtitle{color:#94a3b8;margin:4px 0 0;font:14px system-ui,sans-serif}
+    .shell{position:relative;border:4px solid #0f172a;border-radius:14px;overflow:hidden;background:#0b1020;box-shadow:0 20px 70px #0008}
+    canvas{display:block;width:100%;aspect-ratio:3/2;image-rendering:pixelated;background:#0b1020}
+    .hud{position:absolute;top:8px;left:8px;display:flex;gap:7px;flex-wrap:wrap;pointer-events:none}.chip{background:#0f172add;border:2px solid #cbd5e1;color:#fff;border-radius:8px;padding:5px 8px;font-size:12px}
+    .dialogue{position:absolute;left:3%;right:3%;bottom:3%;background:#f8fafc;color:#111827;border:4px solid #0f172a;border-radius:10px;padding:14px 16px;min-height:100px;box-shadow:inset 0 0 0 3px #cbd5e1;display:none}
+    .dialogue p{margin:0 0 10px;line-height:1.45;font-size:clamp(14px,2.3vw,18px)}
+    button,input{font:inherit}.btn{border:2px solid #0f172a;background:#f8fafc;color:#111827;border-radius:8px;padding:9px 14px;font-weight:800;cursor:pointer}.btn:hover,.btn:focus{background:#fde68a}.btn.dark{background:#172033;color:white;border-color:#94a3b8}.btn.dark:hover{background:#27334b}
+    .dialogue .btn{float:right}
+    .screen{position:absolute;inset:0;background:linear-gradient(#c7f9ff,#d9f99d);color:#111827;display:grid;place-items:center;padding:20px;text-align:center}
+    .panel{width:min(600px,95%);background:#f8fafcee;border:4px solid #0f172a;border-radius:12px;box-shadow:inset 0 0 0 3px #cbd5e1;padding:20px}
+    .panel h2{margin:0 0 8px;font-size:clamp(24px,5vw,38px)}.panel p{font-family:system-ui,sans-serif;line-height:1.5}.prof{font-size:76px;filter:drop-shadow(4px 4px 0 #94a3b8);margin:2px}
+    .name-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.name-row input{font-size:18px;padding:10px;border:3px solid #0f172a;border-radius:8px;width:min(260px,100%);background:white;color:#111827}
+    .battle-menu{position:absolute;left:3%;right:3%;bottom:3%;display:none;background:#f8fafc;color:#111827;border:4px solid #0f172a;border-radius:10px;padding:10px;grid-template-columns:1fr 1fr;gap:8px;box-shadow:inset 0 0 0 3px #cbd5e1}
+    .battle-menu button{min-height:48px}.battle-log{grid-column:1/-1;background:#e2e8f0;border:2px solid #64748b;border-radius:6px;padding:8px;min-height:44px;font-weight:700}
+    .guide{position:absolute;inset:4%;display:none;background:#f8fafcf7;color:#111827;border:4px solid #0f172a;border-radius:12px;padding:16px;overflow:auto;z-index:5}.guide-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.guide-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;margin-top:12px}.entry{border:2px solid #94a3b8;border-radius:8px;padding:10px;background:white}.entry.locked{filter:grayscale(1);opacity:.55}.entry b{display:block;margin-bottom:4px}.tiny{font:12px system-ui,sans-serif;color:#475569}
+    .touch{margin-top:10px;display:none;grid-template-columns:repeat(5,54px);justify-content:center;gap:6px}.touch button{height:48px;border:2px solid #475569;background:#172033;color:white;border-radius:10px;font-weight:900}.touch .spacer{visibility:hidden}
+    .footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#94a3b8;font:13px system-ui,sans-serif;margin-top:8px}.footer button{font:inherit;background:none;border:0;color:#93c5fd;text-decoration:underline;cursor:pointer;padding:0}
+    @media(max-width:720px),(pointer:coarse){.touch{display:grid}.footer{justify-content:center;text-align:center}}
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <div class="top">
-      <div>
-        <h1>Star Sprint</h1>
-        <p class="sub">Collect stars. Dodge the hunters. Survive as long as you can.</p>
-      </div>
-      <div class="stats" aria-live="polite">
-        <div class="pill">Score: <span id="score">0</span></div>
-        <div class="pill">Best: <span id="best">0</span></div>
-        <div class="pill">Lives: <span id="lives">3</span></div>
-      </div>
-    </div>
-
-    <section class="game-shell">
-      <canvas id="game" width="960" height="540" aria-label="Star Sprint game area"></canvas>
-      <div class="overlay" id="overlay">
-        <div class="card">
-          <h2 id="overlayTitle">Ready?</h2>
-          <p id="overlayText">Use WASD or the arrow keys to move. Grab the glowing stars and avoid the red hunters. Every five stars makes the game a little faster.</p>
-          <button id="start">Start Game</button>
-        </div>
-      </div>
-    </section>
-
-    <div class="touch" aria-label="Touch controls">
-      <button class="up" data-key="ArrowUp" type="button">▲</button>
-      <button class="left" data-key="ArrowLeft" type="button">◀</button>
-      <button class="down" data-key="ArrowDown" type="button">▼</button>
-      <button class="right" data-key="ArrowRight" type="button">▶</button>
-    </div>
-
-    <div class="help">
-      <span>Move: WASD / Arrow keys</span>
-      <span>Goal: collect stars without getting hit</span>
-    </div>
-  </main>
-
+<main class="app">
+  <div class="titlebar"><div><h1>Aetherwild: First Steps</h1><p class="subtitle">An original creature-collecting RPG prototype</p></div><button id="guideBtn" class="btn dark" type="button">Field Guide</button></div>
+  <section class="shell">
+    <canvas id="game" width="768" height="512" aria-label="Aetherwild game"></canvas>
+    <div class="hud"><span class="chip" id="areaChip">Prologue</span><span class="chip" id="partyChip">No companion</span></div>
+    <div id="intro" class="screen"><div class="panel" id="introPanel"></div></div>
+    <div id="dialogue" class="dialogue"><p id="dialogueText"></p><button id="dialogueNext" class="btn" type="button">Next ▶</button></div>
+    <div id="battleMenu" class="battle-menu"><div id="battleLog" class="battle-log"></div><button class="btn" data-action="fight">FIGHT</button><button class="btn" data-action="orb">BIND ORB</button><button class="btn" data-action="run">RUN</button><button class="btn" data-action="back">BACK</button></div>
+    <div id="guide" class="guide"><div class="guide-head"><div><h2 style="margin:0">Field Guide</h2><div class="tiny">Species seen and bonded</div></div><button id="closeGuide" class="btn">Close</button></div><div id="guideGrid" class="guide-grid"></div></div>
+  </section>
+  <div class="touch" aria-label="Touch controls"><span class="spacer"></span><button data-key="ArrowUp">▲</button><span class="spacer"></span><button data-key="Enter">A</button><span class="spacer"></span><button data-key="ArrowLeft">◀</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button><button data-key="Escape">B</button><span class="spacer"></span></div>
+  <div class="footer"><span>Move: WASD / Arrows · Interact: Enter / Space · Guide: G</span><button id="resetSave" type="button">Reset save</button></div>
+</main>
 <script>
 (() => {
-  const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
-  const scoreEl = document.getElementById('score');
-  const bestEl = document.getElementById('best');
-  const livesEl = document.getElementById('lives');
-  const overlay = document.getElementById('overlay');
-  const overlayTitle = document.getElementById('overlayTitle');
-  const overlayText = document.getElementById('overlayText');
-  const startBtn = document.getElementById('start');
+'use strict';
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const intro=document.getElementById('intro'),introPanel=document.getElementById('introPanel');
+const dialogue=document.getElementById('dialogue'),dialogueText=document.getElementById('dialogueText'),dialogueNext=document.getElementById('dialogueNext');
+const battleMenu=document.getElementById('battleMenu'),battleLog=document.getElementById('battleLog');
+const guide=document.getElementById('guide'),guideGrid=document.getElementById('guideGrid');
+const areaChip=document.getElementById('areaChip'),partyChip=document.getElementById('partyChip');
+const TILE=32,COLS=24,ROWS=16,SAVE_KEY='aetherwild-demo-v1';
 
-  const keys = new Set();
-  let running = false;
-  let last = 0;
-  let score = 0;
-  let lives = 3;
-  let invuln = 0;
-  let best = Number(localStorage.getItem('starSprintBest') || 0);
-  bestEl.textContent = best;
+const SPECIES={
+  Cindlet:{type:'Flame',color:'#f97316',accent:'#fde68a',baseHP:28,atk:8,def:5,moves:[['Nudge',5,'Plain'],['Cinder Pop',8,'Flame']]},
+  Fernip:{type:'Grove',color:'#22c55e',accent:'#bbf7d0',baseHP:31,atk:6,def:7,moves:[['Nudge',5,'Plain'],['Leaf Flick',8,'Grove']]},
+  Tidebit:{type:'Tide',color:'#38bdf8',accent:'#dbeafe',baseHP:30,atk:7,def:6,moves:[['Nudge',5,'Plain'],['Bubble Jet',8,'Tide']]},
+  Chirplet:{type:'Gale',color:'#facc15',accent:'#fff7b2',baseHP:22,atk:6,def:4,moves:[['Peckle',6,'Gale'],['Nudge',5,'Plain']]},
+  Pebblit:{type:'Stone',color:'#94a3b8',accent:'#e2e8f0',baseHP:34,atk:6,def:9,moves:[['Bonk',6,'Stone'],['Nudge',5,'Plain']]},
+  Mothlet:{type:'Gale',color:'#c084fc',accent:'#f3e8ff',baseHP:24,atk:7,def:4,moves:[['Wing Tap',7,'Gale'],['Dust Puff',5,'Plain']]},
+  Bloomite:{type:'Grove',color:'#ec4899',accent:'#fbcfe8',baseHP:26,atk:6,def:5,moves:[['Petal Pop',7,'Grove'],['Nudge',5,'Plain']]},
+  Voltkit:{type:'Spark',color:'#f59e0b',accent:'#fef3c7',baseHP:25,atk:8,def:4,moves:[['Static Paw',8,'Spark'],['Nudge',5,'Plain']]}
+};
+const TYPE_ADV={Flame:'Grove',Grove:'Tide',Tide:'Flame',Stone:'Gale',Gale:'Grove',Spark:'Tide'};
+const starters=['Cindlet','Fernip','Tidebit'];
+const state={mode:'intro',name:'',rival:'Rin',area:'home',player:{x:11,y:12,dir:'up'},party:[],seen:{},caught:{},starterChosen:false,rivalDefeated:false,storyLabIntro:false,orbs:5,battle:null,lock:false};
 
-  const player = { x: 120, y: 270, r: 16, speed: 290 };
-  const star = { x: 700, y: 270, r: 12 };
-  let enemies = [];
-  let particles = [];
+function makeMon(name,level=5){const s=SPECIES[name],maxHP=s.baseHP+level*2;return{name,level,xp:0,maxHP,hp:maxHP,atk:s.atk+level,def:s.def+Math.floor(level/2),moves:s.moves.map(m=>[...m])};}
+function save(){if(!state.starterChosen)return;localStorage.setItem(SAVE_KEY,JSON.stringify({name:state.name,rival:state.rival,area:state.area,player:state.player,party:state.party,seen:state.seen,caught:state.caught,starterChosen:state.starterChosen,rivalDefeated:state.rivalDefeated,storyLabIntro:state.storyLabIntro,orbs:state.orbs}));}
+function load(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY));if(!d)return false;Object.assign(state,d,{mode:'overworld',battle:null,lock:false});return true}catch{return false}}
+function resetSave(){localStorage.removeItem(SAVE_KEY);location.reload()}
 
-  function rand(min, max) { return Math.random() * (max - min) + min; }
-  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
-  function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
-
-  function spawnStar() {
-    let tries = 0;
-    do {
-      star.x = rand(45, canvas.width - 45);
-      star.y = rand(45, canvas.height - 45);
-      tries++;
-    } while (dist(player, star) < 150 && tries < 20);
+const introSteps=[
+  ['prof','Welcome, traveler! My name is Professor Lumen.'],
+  ['creature','Our world is threaded with a strange energy called the Aether.'],
+  ['creature','Where the Aether gathers, curious creatures called Wisplings appear.'],
+  ['prof','Some people study them. Some befriend them. And some test their bonds in friendly battles.'],
+  ['name','Before we begin... what should I call you?'],
+  ['rival','Excellent. My apprentice Rin is starting a journey today, too.'],
+  ['prof','Your story begins in the little town of Bramblewick. Go meet me at the laboratory!']
+];
+let introIndex=0;
+function showIntro(){
+  intro.style.display='grid';state.mode='intro';const [kind,text]=introSteps[introIndex];
+  let visual=kind==='prof'?'<div class="prof">🧑‍🔬</div>':kind==='creature'?'<div class="prof">✦</div>':'<div class="prof">🌿</div>';
+  if(kind==='name'){
+    introPanel.innerHTML=`${visual}<h2>Your name?</h2><p>${text}</p><form id="nameForm" class="name-row"><input id="nameInput" maxlength="12" placeholder="Traveler" autocomplete="off" required><button class="btn">Confirm</button></form>`;
+    document.getElementById('nameForm').addEventListener('submit',e=>{e.preventDefault();state.name=(document.getElementById('nameInput').value.trim()||'Traveler').slice(0,12);introIndex++;showIntro()});return;
   }
+  introPanel.innerHTML=`${visual}<h2>${kind==='rival'?'Another traveler':'Professor Lumen'}</h2><p>${text.replace('traveler',state.name||'traveler')}</p><button id="introNext" class="btn">${introIndex===introSteps.length-1?'Begin Adventure':'Next ▶'}</button>`;
+  document.getElementById('introNext').onclick=()=>{introIndex++;if(introIndex>=introSteps.length){intro.style.display='none';state.mode='overworld';state.area='home';state.player={x:11,y:12,dir:'up'};say(`Mom: ${state.name}, Professor Lumen asked you to stop by the lab. It's the blue-roofed building across town.`);render()}else showIntro()};
+}
+function startScreen(){
+ const hasSave=!!localStorage.getItem(SAVE_KEY);intro.style.display='grid';state.mode='intro';introPanel.innerHTML=`<div class="prof">✦</div><h2>Aetherwild</h2><p>A tiny original creature-collecting RPG demo. Explore Bramblewick, choose a Wispling, battle your rival, and search Route 1.</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button id="newGame" class="btn">New Adventure</button>${hasSave?'<button id="continueGame" class="btn">Continue</button>':''}</div>`;
+ document.getElementById('newGame').onclick=()=>{localStorage.removeItem(SAVE_KEY);introIndex=0;showIntro()};
+ const c=document.getElementById('continueGame');if(c)c.onclick=()=>{if(load()){intro.style.display='none';render();say(`Welcome back, ${state.name}.`)}else{introIndex=0;showIntro()}};
+}
 
-  function spawnEnemy() {
-    const side = Math.floor(Math.random() * 4);
-    let x, y;
-    if (side === 0) { x = -30; y = rand(30, canvas.height - 30); }
-    if (side === 1) { x = canvas.width + 30; y = rand(30, canvas.height - 30); }
-    if (side === 2) { x = rand(30, canvas.width - 30); y = -30; }
-    if (side === 3) { x = rand(30, canvas.width - 30); y = canvas.height + 30; }
-    const speed = 92 + Math.min(score * 4, 150) + rand(-10, 18);
-    enemies.push({ x, y, r: 17, speed, wobble: rand(0, Math.PI * 2) });
-  }
+function say(text,cb){state.lock=true;dialogueText.textContent=text;dialogue.style.display='block';dialogueNext.textContent='Next ▶';dialogueNext.onclick=()=>{dialogue.style.display='none';state.lock=false;if(cb)cb();render()}}
+function chain(lines,done){let i=0;const next=()=>{if(i>=lines.length){if(done)done();return}say(lines[i++],next)};next()}
 
-  function burst(x, y, count, kind) {
-    for (let i = 0; i < count; i++) {
-      const a = rand(0, Math.PI * 2);
-      const s = rand(45, 170);
-      particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: rand(.35, .8), kind });
-    }
-  }
+function areaName(){return({home:'Your Home',town:'Bramblewick',lab:'Lumen Lab',route:'Route 1'})[state.area]}
+function isGrass(x,y){return state.area==='route'&&y>=2&&y<=10&&((x>=2&&x<=8)||(x>=15&&x<=21));}
+function blocked(area,x,y){
+ if(x<0||y<0||x>=COLS||y>=ROWS)return true;
+ if(area==='home'){if(x===0||x===23||y===0||y===15)return true;if(y===4&&x>2&&x<21)return true;return false}
+ if(area==='lab'){if(x===0||x===23||y===0||y===15)return true;if((x===6||x===11||x===16)&&y===6)return true;return false}
+ if(area==='town'){
+   const buildings=[{x:1,y:7,w:7,h:5},{x:15,y:2,w:8,h:6},{x:2,y:1,w:7,h:4}];
+   if(buildings.some(b=>x>=b.x&&x<b.x+b.w&&y>=b.y&&y<b.y+b.h)){
+     if(x===4&&y===11)return false;if(x===19&&y===7)return false;return true;
+   }
+   return false;
+ }
+ return false;
+}
+function transition(area,x,y){state.area=area;state.player.x=x;state.player.y=y;save();render()}
+function tryMove(dx,dy){
+ if(state.mode!=='overworld'||state.lock)return;const p=state.player,nx=p.x+dx,ny=p.y+dy;p.dir=dy<0?'up':dy>0?'down':dx<0?'left':'right';
+ if(state.area==='home'&&ny>=15&&nx>=10&&nx<=13){transition('town',4,12);return}
+ if(state.area==='lab'&&ny>=15&&nx>=10&&nx<=13){transition('town',19,8);return}
+ if(state.area==='town'&&ny<0&&nx>=10&&nx<=13){if(!state.starterChosen){say('A strange feeling tells you to visit Professor Lumen before leaving town.');return}transition('route',11,14);return}
+ if(state.area==='route'&&ny>=15&&nx>=9&&nx<=14){transition('town',11,0);return}
+ if(blocked(state.area,nx,ny))return;p.x=nx;p.y=ny;render();
+ if(isGrass(nx,ny)&&state.starterChosen&&Math.random()<0.22)startWildBattle();
+ save();
+}
+function facingTile(){const p=state.player,d={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]}[p.dir];return{x:p.x+d[0],y:p.y+d[1]}}
+function interact(){
+ if(state.mode==='battle'){return}
+ if(state.mode!=='overworld'||state.lock)return;const f=facingTile();
+ if(state.area==='home'){
+   if((f.x===5&&f.y===8)||(f.x===6&&f.y===8))say(`Mom: Have fun, ${state.name}. And don't forget to visit Professor Lumen!`);
+   else say('Nothing unusual here.');return;
+ }
+ if(state.area==='town'){
+   if(f.x===12&&f.y===9)chain(['Kid: I heard the tall grass on Route 1 is full of Chirplets.','Kid: Professor Lumen says every Wispling has its own temperament.']);
+   else if(f.x===9&&f.y===5)say('Gardener: Bind Orbs work better when a wild Wispling is tired.');
+   else if(f.x===19&&f.y===7){transition('lab',11,13)}
+   else if(f.x===4&&f.y===11){transition('home',11,13)}
+   else say('The town hums with the quiet excitement of a new journey.');return;
+ }
+ if(state.area==='lab'){
+   if(f.x===11&&f.y===3){
+     if(!state.starterChosen)chain([`Professor Lumen: ${state.name}! Perfect timing.`,`Professor Lumen: Three young Wisplings are ready to meet a partner. Choose the one that speaks to you.`]);
+     else if(!state.rivalDefeated)say('Professor Lumen: Rin looks eager to test your new partnership.');
+     else say('Professor Lumen: Route 1 is open to you now. Record every Wispling you meet in your Field Guide!');return;
+   }
+   const pedestal={6:'Cindlet',11:'Fernip',16:'Tidebit'}[f.x];if(pedestal&&f.y===6){chooseStarter(pedestal);return}
+   if(f.x===18&&f.y===10){say(`Rin: ${state.rivalDefeated?'That battle was fun. I’ll train harder for next time!':'Pick your partner already! I want to battle!'}`);return}
+   say('Lab equipment softly beeps and flickers.');return;
+ }
+ if(state.area==='route')say('The wind stirs the tall grass. Something might be watching.');
+}
+function chooseStarter(name){
+ if(state.starterChosen){say('The other Wisplings have already found new partners.');return}
+ chain([`${name} looks up at you with bright, curious eyes.`,`Professor Lumen: You chose ${name}! A wonderful partner.`],()=>{
+   state.party=[makeMon(name,5)];state.starterChosen=true;state.seen[name]=1;state.caught[name]=1;state.orbs=5;save();render();
+   const rivalChoice=({Cindlet:'Tidebit',Fernip:'Cindlet',Tidebit:'Fernip'})[name];
+   chain([`Rin: Nice choice, ${state.name}. I’ll partner with ${rivalChoice}!`,'Rin: Come on — one quick battle before we head out!'],()=>startBattle(makeMon(rivalChoice,5),false,true));
+ });
+}
 
-  function reset() {
-    score = 0;
-    lives = 3;
-    invuln = 0;
-    player.x = 120;
-    player.y = canvas.height / 2;
-    enemies = [];
-    particles = [];
-    spawnStar();
-    spawnEnemy();
-    spawnEnemy();
-    scoreEl.textContent = score;
-    livesEl.textContent = lives;
-  }
+function startWildBattle(){const pool=['Chirplet','Pebblit','Mothlet','Bloomite','Voltkit'];const name=pool[Math.floor(Math.random()*pool.length)],level=3+Math.floor(Math.random()*3);state.seen[name]=1;startBattle(makeMon(name,level),true,false)}
+function startBattle(enemy,wild,trainer){
+ if(!state.party.length)return;state.mode='battle';state.lock=true;state.battle={enemy,wild,trainer,player:state.party[0],message:wild?`A wild ${enemy.name} appeared!`:`Rin sent out ${enemy.name}!`,choosingMoves:false};battleMenu.style.display='grid';intro.style.display='none';dialogue.style.display='none';drawBattle();showBattleMain();
+}
+function effectiveness(moveType,targetType){if(TYPE_ADV[moveType]===targetType)return 1.5;if(TYPE_ADV[targetType]===moveType)return .7;return 1}
+function hit(attacker,defender,move){const mult=effectiveness(move[2],SPECIES[defender.name].type),raw=Math.max(2,move[1]+attacker.atk-Math.floor(defender.def*.65)+Math.floor(Math.random()*4));const dmg=Math.max(1,Math.floor(raw*mult));defender.hp=Math.max(0,defender.hp-dmg);return{dmg,mult}}
+function showBattleMain(msg){const b=state.battle;if(!b)return;b.choosingMoves=false;battleLog.textContent=msg||b.message;battleMenu.querySelectorAll('button').forEach(x=>x.style.display='block');battleMenu.querySelector('[data-action="back"]').style.display='none';battleMenu.querySelector('[data-action="orb"]').disabled=!b.wild||state.orbs<=0;}
+function showMoves(){const b=state.battle;b.choosingMoves=true;const buttons=[...battleMenu.querySelectorAll('button')];buttons.forEach(x=>x.style.display='none');battleLog.textContent='Choose a move.';b.player.moves.forEach((m,i)=>{const btn=document.createElement('button');btn.className='btn move-temp';btn.textContent=`${m[0]} · ${m[2]} · ${m[1]}`;btn.onclick=()=>playerAttack(i);battleMenu.appendChild(btn)});const back=battleMenu.querySelector('[data-action="back"]');back.style.display='block';}
+function clearTemp(){battleMenu.querySelectorAll('.move-temp').forEach(x=>x.remove())}
+function playerAttack(index){const b=state.battle;if(!b)return;clearTemp();const move=b.player.moves[index],r=hit(b.player,b.enemy,move);b.message=`${b.player.name} used ${move[0]}! ${r.dmg} damage${r.mult>1?' — super effective!':r.mult<1?' — resisted.':''}`;drawBattle();if(b.enemy.hp<=0){setTimeout(()=>finishVictory(),350);return}setTimeout(enemyTurn,450)}
+function enemyTurn(){const b=state.battle;if(!b)return;const move=b.enemy.moves[Math.floor(Math.random()*b.enemy.moves.length)],r=hit(b.enemy,b.player,move);b.message=`${b.enemy.name} used ${move[0]}! ${r.dmg} damage.`;drawBattle();if(b.player.hp<=0){setTimeout(()=>loseBattle(),450);return}showBattleMain(b.message)}
+function finishVictory(){const b=state.battle;if(!b)return;const gain=b.enemy.level*5;b.player.xp+=gain;let leveled=false;if(b.player.xp>=b.player.level*10){b.player.xp-=b.player.level*10;b.player.level++;b.player.maxHP+=3;b.player.hp=b.player.maxHP;b.player.atk++;b.player.def++;leveled=true}const wasTrainer=b.trainer;if(wasTrainer)state.rivalDefeated=true;const text=`${b.enemy.name} was defeated! ${b.player.name} gained ${gain} XP.${leveled?` ${b.player.name} grew to level ${b.player.level}!`:''}`;endBattle();chain([text,...(wasTrainer?['Rin: Okay, that was awesome. Next time I’m winning!','Professor Lumen: Excellent! Take these 5 Bind Orbs and begin your Field Guide on Route 1.']:[])],()=>{if(wasTrainer)state.orbs=5;save();render()})}
+function loseBattle(){const b=state.battle,text=`${b.player.name} ran out of energy. Professor Lumen patches everyone up.`;b.player.hp=b.player.maxHP;endBattle();transition('lab',11,10);say(text)}
+function endBattle(){clearTemp();battleMenu.style.display='none';state.mode='overworld';state.lock=false;state.battle=null;render();save()}
+function throwOrb(){const b=state.battle;if(!b||!b.wild||state.orbs<=0)return;state.orbs--;const ratio=1-b.enemy.hp/b.enemy.maxHP,chance=.25+ratio*.6;const caught=Math.random()<chance;if(caught){state.caught[b.enemy.name]=(state.caught[b.enemy.name]||0)+1;const captured={...b.enemy,moves:b.enemy.moves.map(m=>[...m])};if(state.party.length<6)state.party.push(captured);const name=b.enemy.name;endBattle();say(`Click... shimmer... bonded! ${name} joined you${state.party.length<=6?'':' in your reserve'}!`)}else{b.message=`The Bind Orb flashed, but ${b.enemy.name} broke free! (${state.orbs} left)`;drawBattle();setTimeout(enemyTurn,450)}}
+function runBattle(){const b=state.battle;if(!b)return;if(!b.wild){showBattleMain('You can’t walk away from Rin’s challenge!');return}if(Math.random()<.85){endBattle();say('You slipped away safely.')}else{b.message='Couldn’t escape!';drawBattle();setTimeout(enemyTurn,350)}}
 
-  function startGame() {
-    reset();
-    running = true;
-    overlay.style.display = 'none';
-    last = performance.now();
-    requestAnimationFrame(loop);
-  }
+function drawCreature(name,x,y,scale=1,flip=false){const s=SPECIES[name];ctx.save();ctx.translate(x,y);ctx.scale(flip?-scale:scale,scale);ctx.fillStyle='#0002';ctx.beginPath();ctx.ellipse(0,30,32,10,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=s.color;ctx.strokeStyle='#0f172a';ctx.lineWidth=3/scale;ctx.beginPath();ctx.ellipse(0,0,27,29,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle=s.accent;ctx.beginPath();ctx.arc(-9,-4,7,0,Math.PI*2);ctx.arc(9,-4,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#0f172a';ctx.beginPath();ctx.arc(-8,-3,3,0,Math.PI*2);ctx.arc(8,-3,3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.moveTo(-8,-24);ctx.lineTo(-19,-41);ctx.lineTo(0,-30);ctx.moveTo(8,-24);ctx.lineTo(19,-41);ctx.lineTo(0,-30);ctx.stroke();ctx.restore()}
+function rect(x,y,w,h,c,stroke){ctx.fillStyle=c;ctx.fillRect(x,y,w,h);if(stroke){ctx.strokeStyle=stroke;ctx.strokeRect(x,y,w,h)}}
+function tileRect(x,y,w,h,c){rect(x*TILE,y*TILE,w*TILE,h*TILE,c)}
+function drawWorld(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ if(state.area==='home'){ctx.fillStyle='#f7e4c6';ctx.fillRect(0,0,768,512);for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){ctx.strokeStyle='#e7c99a';ctx.strokeRect(x*TILE,y*TILE,TILE,TILE)}tileRect(3,2,7,2,'#8b5e3c');tileRect(15,2,6,2,'#8b5e3c');tileRect(3,4,18,1,'#6b4423');tileRect(4,8,3,2,'#d8a25e');ctx.fillStyle='#111827';ctx.font='16px monospace';ctx.fillText('HOME',16,24);drawNPC(5,8,'#fb7185','MOM');drawDoor(10,15,4,'#7c3aed');}
+ if(state.area==='town'){ctx.fillStyle='#86c96b';ctx.fillRect(0,0,768,512);for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){if((x>=10&&x<=13)||(y>=8&&y<=10)){ctx.fillStyle='#d8c59b';ctx.fillRect(x*TILE,y*TILE,TILE,TILE)}}drawBuilding(1,7,7,5,'#ef4444','HOME',4,11);drawBuilding(15,2,8,6,'#3b82f6','LUMEN LAB',19,7);drawBuilding(2,1,7,4,'#f59e0b','SHOP',-1,-1);drawNPC(12,9,'#60a5fa','KID');drawNPC(9,5,'#22c55e','GARDENER');ctx.fillStyle='#14532d';ctx.font='14px monospace';ctx.fillText('↑ ROUTE 1',334,22);}
+ if(state.area==='lab'){ctx.fillStyle='#dbeafe';ctx.fillRect(0,0,768,512);for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){ctx.strokeStyle='#bfdbfe';ctx.strokeRect(x*TILE,y*TILE,TILE,TILE)}tileRect(2,2,20,2,'#94a3b8');drawNPC(11,3,'#e2e8f0','LUMEN');drawNPC(18,10,'#f59e0b','RIN');['Cindlet','Fernip','Tidebit'].forEach((n,i)=>{const x=[6,11,16][i];ctx.fillStyle='#64748b';ctx.fillRect(x*TILE+5,6*TILE+16,22,16);if(!state.starterChosen||state.party[0]?.name===n)drawCreature(n,x*TILE+16,6*TILE+8,.42)});drawDoor(10,15,4,'#3b82f6');ctx.fillStyle='#0f172a';ctx.font='14px monospace';ctx.fillText('LUMEN LAB',16,24);}
+ if(state.area==='route'){ctx.fillStyle='#74b65a';ctx.fillRect(0,0,768,512);for(let y=2;y<=10;y++)for(let x=2;x<=21;x++){if(isGrass(x,y)){ctx.fillStyle=(x+y)%2?'#398c47':'#2f7e3e';ctx.fillRect(x*TILE,y*TILE,TILE,TILE);ctx.fillStyle='#bbf7d0';ctx.font='18px serif';ctx.fillText('〽',x*TILE+7,y*TILE+23)}}tileRect(9,11,6,5,'#d6c595');ctx.fillStyle='#14532d';ctx.font='14px monospace';ctx.fillText('ROUTE 1 · BRAMBLEWICK ↓',260,492);}
+ drawPlayer();areaChip.textContent=areaName();const lead=state.party[0];partyChip.textContent=lead?`${lead.name} Lv.${lead.level} · ${state.orbs} Orbs`:'No companion';
+}
+function drawBuilding(x,y,w,h,roof,label,doorX,doorY){tileRect(x,y,w,h,'#f1f5f9');tileRect(x,y,w,1,roof);ctx.strokeStyle='#334155';ctx.lineWidth=2;ctx.strokeRect(x*TILE,y*TILE,w*TILE,h*TILE);ctx.fillStyle='#0f172a';ctx.font='12px monospace';ctx.fillText(label,x*TILE+10,(y+2)*TILE);if(doorX>=0){ctx.fillStyle='#78350f';ctx.fillRect(doorX*TILE+8,doorY*TILE+4,16,28)}}
+function drawDoor(x,y,w,c){ctx.fillStyle=c;ctx.fillRect(x*TILE,y*TILE,w*TILE,8)}
+function drawNPC(x,y,c,label){ctx.fillStyle=c;ctx.strokeStyle='#0f172a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x*TILE+16,y*TILE+13,9,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillRect(x*TILE+9,y*TILE+22,14,10);ctx.fillStyle='#0f172a';ctx.font='9px monospace';ctx.textAlign='center';ctx.fillText(label,x*TILE+16,y*TILE+44);ctx.textAlign='left'}
+function drawPlayer(){const p=state.player,x=p.x*TILE+16,y=p.y*TILE+16;ctx.fillStyle='#0f172a';ctx.fillRect(x-8,y-9,16,18);ctx.fillStyle='#ef4444';ctx.fillRect(x-9,y-13,18,7);ctx.fillStyle='#fde68a';ctx.fillRect(x-6,y-6,12,7);ctx.fillStyle='#2563eb';ctx.fillRect(x-8,y+2,16,9)}
+function hpBar(mon,x,y,w){ctx.fillStyle='#0f172a';ctx.fillRect(x,y,w,12);ctx.fillStyle=mon.hp/mon.maxHP>.5?'#22c55e':mon.hp/mon.maxHP>.2?'#eab308':'#ef4444';ctx.fillRect(x+2,y+2,(w-4)*mon.hp/mon.maxHP,8)}
+function drawBattle(){const b=state.battle;if(!b)return;ctx.fillStyle='#d9f99d';ctx.fillRect(0,0,768,512);ctx.fillStyle='#a7f3d0';ctx.beginPath();ctx.ellipse(575,180,120,38,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#bfdbfe';ctx.beginPath();ctx.ellipse(190,370,140,42,0,0,Math.PI*2);ctx.fill();drawCreature(b.enemy.name,575,145,1.25);drawCreature(b.player.name,185,335,1.55,true);ctx.fillStyle='#f8fafc';ctx.strokeStyle='#0f172a';ctx.lineWidth=3;ctx.fillRect(36,38,290,76);ctx.strokeRect(36,38,290,76);ctx.fillRect(445,270,286,82);ctx.strokeRect(445,270,286,82);ctx.fillStyle='#0f172a';ctx.font='bold 18px monospace';ctx.fillText(`${b.enemy.name}  Lv.${b.enemy.level}`,52,66);ctx.fillText(`${b.player.name}  Lv.${b.player.level}`,461,300);ctx.font='14px monospace';ctx.fillText(`HP ${b.enemy.hp}/${b.enemy.maxHP}`,52,102);ctx.fillText(`HP ${b.player.hp}/${b.player.maxHP}`,461,340);hpBar(b.enemy,162,88,145);hpBar(b.player,565,326,145);battleLog.textContent=b.message;areaChip.textContent=b.wild?'Wild Encounter':'Rival Battle';partyChip.textContent=`${state.orbs} Bind Orbs`}
+function render(){if(state.mode==='battle')drawBattle();else drawWorld()}
 
-  function endGame() {
-    running = false;
-    if (score > best) {
-      best = score;
-      localStorage.setItem('starSprintBest', best);
-      bestEl.textContent = best;
-    }
-    overlayTitle.textContent = 'Game Over';
-    overlayText.textContent = `You collected ${score} star${score === 1 ? '' : 's'}. Your best score is ${best}.`;
-    startBtn.textContent = 'Play Again';
-    overlay.style.display = 'grid';
-  }
+function openGuide(){if(state.mode==='intro')return;guideGrid.innerHTML=Object.keys(SPECIES).map(name=>{const s=SPECIES[name],seen=!!state.seen[name],caught=state.caught[name]||0;return`<div class="entry ${seen?'':'locked'}"><b>${seen?name:'???'}</b><div class="tiny">${seen?`Type: ${s.type}`:'Unknown species'}</div><div class="tiny">Bonded: ${caught}</div></div>`}).join('');guide.style.display='block';state.lock=true}
+function closeGuide(){guide.style.display='none';state.lock=false}
 
-  function update(dt) {
-    const up = keys.has('ArrowUp') || keys.has('w');
-    const down = keys.has('ArrowDown') || keys.has('s');
-    const left = keys.has('ArrowLeft') || keys.has('a');
-    const right = keys.has('ArrowRight') || keys.has('d');
-    let dx = (right ? 1 : 0) - (left ? 1 : 0);
-    let dy = (down ? 1 : 0) - (up ? 1 : 0);
-    if (dx || dy) {
-      const m = Math.hypot(dx, dy);
-      dx /= m; dy /= m;
-      player.x += dx * player.speed * dt;
-      player.y += dy * player.speed * dt;
-    }
-    player.x = clamp(player.x, player.r, canvas.width - player.r);
-    player.y = clamp(player.y, player.r, canvas.height - player.r);
-
-    if (dist(player, star) < player.r + star.r + 4) {
-      score++;
-      scoreEl.textContent = score;
-      burst(star.x, star.y, 16, 'star');
-      spawnStar();
-      if (score % 5 === 0) spawnEnemy();
-    }
-
-    for (const e of enemies) {
-      const angle = Math.atan2(player.y - e.y, player.x - e.x);
-      e.wobble += dt * 4;
-      e.x += Math.cos(angle + Math.sin(e.wobble) * .10) * e.speed * dt;
-      e.y += Math.sin(angle + Math.sin(e.wobble) * .10) * e.speed * dt;
-      if (invuln <= 0 && dist(player, e) < player.r + e.r) {
-        lives--;
-        livesEl.textContent = lives;
-        invuln = 1.35;
-        burst(player.x, player.y, 24, 'hit');
-        player.x = 120;
-        player.y = canvas.height / 2;
-        if (lives <= 0) { endGame(); return; }
-      }
-    }
-
-    invuln = Math.max(0, invuln - dt);
-    for (const p of particles) {
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      p.vx *= .985;
-      p.vy *= .985;
-      p.life -= dt;
-    }
-    particles = particles.filter(p => p.life > 0);
-  }
-
-  function drawGrid() {
-    ctx.strokeStyle = '#172033';
-    ctx.lineWidth = 1;
-    for (let x = 0; x <= canvas.width; x += 48) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-    }
-    for (let y = 0; y <= canvas.height; y += 48) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-    }
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#070c15';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawGrid();
-
-    const pulse = 1 + Math.sin(performance.now() / 150) * .12;
-    ctx.save();
-    ctx.translate(star.x, star.y);
-    ctx.scale(pulse, pulse);
-    ctx.shadowBlur = 24;
-    ctx.shadowColor = '#fde68a';
-    ctx.fillStyle = '#fde68a';
-    ctx.beginPath();
-    for (let i = 0; i < 10; i++) {
-      const a = -Math.PI / 2 + i * Math.PI / 5;
-      const r = i % 2 === 0 ? 14 : 6;
-      const x = Math.cos(a) * r, y = Math.sin(a) * r;
-      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-    }
-    ctx.closePath(); ctx.fill(); ctx.restore();
-
-    for (const e of enemies) {
-      ctx.save();
-      ctx.translate(e.x, e.y);
-      ctx.rotate(performance.now() / 700 + e.wobble * .15);
-      ctx.shadowBlur = 18;
-      ctx.shadowColor = '#fb7185';
-      ctx.fillStyle = '#ef476f';
-      ctx.fillRect(-14, -14, 28, 28);
-      ctx.restore();
-    }
-
-    ctx.save();
-    ctx.globalAlpha = invuln > 0 && Math.floor(invuln * 10) % 2 === 0 ? .28 : 1;
-    ctx.shadowBlur = 22;
-    ctx.shadowColor = '#7dd3fc';
-    ctx.fillStyle = '#38bdf8';
-    ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#e0f2fe';
-    ctx.beginPath(); ctx.arc(player.x - 5, player.y - 5, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-
-    for (const p of particles) {
-      ctx.globalAlpha = Math.max(0, p.life * 1.6);
-      ctx.fillStyle = p.kind === 'star' ? '#fde68a' : '#fb7185';
-      ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  function loop(now) {
-    if (!running) return;
-    const dt = Math.min((now - last) / 1000, .033);
-    last = now;
-    update(dt);
-    draw();
-    if (running) requestAnimationFrame(loop);
-  }
-
-  window.addEventListener('keydown', e => {
-    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","w","a","s","d"].includes(k)) e.preventDefault();
-    keys.add(k);
-  }, { passive:false });
-  window.addEventListener('keyup', e => keys.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key));
-
-  document.querySelectorAll('[data-key]').forEach(btn => {
-    const key = btn.dataset.key;
-    const press = e => { e.preventDefault(); keys.add(key); };
-    const release = e => { e.preventDefault(); keys.delete(key); };
-    btn.addEventListener('pointerdown', press);
-    btn.addEventListener('pointerup', release);
-    btn.addEventListener('pointercancel', release);
-    btn.addEventListener('pointerleave', release);
-  });
-
-  startBtn.addEventListener('click', startGame);
-  draw();
+document.querySelectorAll('#battleMenu [data-action]').forEach(btn=>btn.addEventListener('click',()=>{const a=btn.dataset.action;if(!state.battle)return;if(a==='fight')showMoves();if(a==='orb')throwOrb();if(a==='run')runBattle();if(a==='back'){clearTemp();showBattleMain()}}));
+document.getElementById('guideBtn').onclick=openGuide;document.getElementById('closeGuide').onclick=closeGuide;document.getElementById('resetSave').onclick=()=>{if(confirm('Erase this demo save and restart?'))resetSave()};
+window.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','Enter'].includes(e.key))e.preventDefault();if(guide.style.display==='block'){if(e.key==='Escape'||e.key.toLowerCase()==='g')closeGuide();return}if(state.mode==='intro')return;if(state.mode==='battle'){if(e.key==='Escape'&&state.battle?.choosingMoves){clearTemp();showBattleMain()}return}const k=e.key.toLowerCase();if(k==='arrowup'||k==='w')tryMove(0,-1);else if(k==='arrowdown'||k==='s')tryMove(0,1);else if(k==='arrowleft'||k==='a')tryMove(-1,0);else if(k==='arrowright'||k==='d')tryMove(1,0);else if(k==='enter'||k===' ')interact();else if(k==='g')openGuide()},{passive:false});
+document.querySelectorAll('[data-key]').forEach(btn=>btn.addEventListener('click',()=>{const k=btn.dataset.key;if(k==='ArrowUp')tryMove(0,-1);if(k==='ArrowDown')tryMove(0,1);if(k==='ArrowLeft')tryMove(-1,0);if(k==='ArrowRight')tryMove(1,0);if(k==='Enter')interact();if(k==='Escape'&&guide.style.display==='block')closeGuide()}));
+startScreen();render();
 })();
 </script>
 </body>
