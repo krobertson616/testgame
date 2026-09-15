@@ -24,6 +24,10 @@ jobs:
           test -s dist/assets/kenney-tiny-town.png
           test -s dist/assets/kenney-tiny-dungeon.png
           test -s dist/assets/tiny-creatures.png
+          test -s dist/assets/scarloxy/tileset.png
+          test -s dist/assets/scarloxy/characters.png
+          test -s dist/assets/scarloxy/monsters.png
+          test -s dist/assets/scarloxy/battle.png
 
       - name: Set up Butler
         uses: jdno/setup-butler@v2.0.0
