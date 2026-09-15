@@ -20,6 +20,10 @@ jobs:
         run: |
           mkdir -p dist
           cp index.html dist/index.html
+          cp -R assets dist/assets
+          test -s dist/assets/kenney-tiny-town.png
+          test -s dist/assets/kenney-tiny-dungeon.png
+          test -s dist/assets/tiny-creatures.png
 
       - name: Set up Butler
         uses: jdno/setup-butler@v2.0.0
