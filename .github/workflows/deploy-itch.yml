@@ -1,0 +1,30 @@
+name: Deploy to itch.io
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare web build
+        run: |
+          mkdir -p dist
+          cp index.html dist/index.html
+
+      - name: Set up Butler
+        uses: jdno/setup-butler@v2.0.0
+
+      - name: Publish web build to itch.io
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: butler push dist krobertson616/testgame:web
